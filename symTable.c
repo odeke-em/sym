@@ -47,10 +47,10 @@ int newSymbolEntry(STable *s) {
     if (s->symbolList == NULL) {
       raiseError("Symbol Table List is null");
     } else {
-      unsigned int key = s->nextAvailIndex;
-      while (*(s->symbolList + key) && key++ < s->size) {
+      unsigned int key = s->nextAvailIndex + 1;
+      while (*(s->symbolList + key) != NULL && key++ < s->size) {
         // TODO Figure out a policy for vacating already registered symbols;
-        raiseWarning("Was not expecting symbol at position: %d", s->nextAvailIndex);
+        raiseWarning("Was not expecting symbol at position: %d", key);
       }
 
       if (key >= s->size) {
@@ -60,8 +60,8 @@ int newSymbolEntry(STable *s) {
           (void *)createHashList, (void *)destroyHashList
         );
         (*(s->symbolList + key))->data = createHashList(SYM_HASHLIST_SIZE);
-        ++s->nextAvailIndex;
-        return key;
+        s->nextAvailIndex = key;
+        return key - 1;
       }
     }
   } else {
