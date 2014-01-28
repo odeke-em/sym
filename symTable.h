@@ -30,7 +30,9 @@
   Symbol *freeSymbol(Symbol *s);
 
   Symbol *createSymbol(allocator allocFunc, deAllocator deAllocFunc);
-  inline unsigned int isEmpty(const STable *s);
+  int addSymbol(STable *s, const unsigned int symIndex, void *data, const unsigned int hash);
   inline Symbol *getSymbolByIndex(STable *s, const int key);
+
+  inline unsigned int isEmpty(const STable *s);
   inline int keyToSymAddrSpace(const STable *s, const int key);
 #endif

@@ -1,6 +1,7 @@
 // Author: Emmanuel Odeke <odeke@ualberta.ca>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "symTable.h"
 #include "hashlist/errors.h"
@@ -15,30 +16,31 @@ inline int keyToSymAddrSpace(const STable *s, const int key) {
 
 inline Symbol *getSymbolByIndex(STable *s, const int key) {
   const int addrKey = keyToSymAddrSpace(s, key);
+  printf("addrKeyByKey : %d\n", addrKey);
   return addrKey < 0 ? NULL : *(s->symbolList + addrKey);
 }
 
 STable *createSTable(unsigned int size) {
-  STable *nST = (STable *)malloc(sizeof(STable));
-  if (nST == NULL) {
+  STable *stringIndexT = (STable *)malloc(sizeof(STable));
+  if (stringIndexT == NULL) {
     raiseError("No memory left to create symbol table");
   }
 
-  if ((nST->symbolList = (Symbol **)malloc(sizeof(Symbol *) * size)) == NULL) {
+  if ((stringIndexT->symbolList = (Symbol **)malloc(sizeof(Symbol *) * size)) == NULL) {
     raiseError("Cannot allocate memory for the symbol table list");
   }
 
-  nST->size = size;
-  nST->nextAvailIndex = 0;
+  stringIndexT->size = size;
+  stringIndexT->nextAvailIndex = 0;
 
-  Symbol **sIt = nST->symbolList, 
-         **sEnd = sIt + nST->size;
+  Symbol **sIt = stringIndexT->symbolList, 
+         **sEnd = sIt + stringIndexT->size;
 
   while (sIt < sEnd) {
     *sIt++ = NULL;
   }
 
-  return nST;
+  return stringIndexT;
 }
 
 // Protocol => Each entry in the symbol table is a hashlist
@@ -47,10 +49,10 @@ int newSymbolEntry(STable *s) {
     if (s->symbolList == NULL) {
       raiseError("Symbol Table List is null");
     } else {
-      unsigned int key = s->nextAvailIndex + 1;
+      unsigned int key = s->nextAvailIndex;
       while (*(s->symbolList + key) != NULL && key++ < s->size) {
         // TODO Figure out a policy for vacating already registered symbols;
-        raiseWarning("Was not expecting symbol at position: %d", key);
+        // raiseWarning("Was not expecting symbol at position: %d", key++);
       }
 
       if (key >= s->size) {
@@ -61,11 +63,25 @@ int newSymbolEntry(STable *s) {
         );
         (*(s->symbolList + key))->data = createHashList(SYM_HASHLIST_SIZE);
         s->nextAvailIndex = key;
-        return key - 1;
+        return key;
       }
     }
   } else {
     raiseWarning("Symbol Table is null", "");
+    return -1;
+  }
+}
+
+int addSymbol(STable *s, const unsigned int symIndex, void *data, const unsigned int hash) {
+  if (s != NULL) {
+    Symbol *symAtI = getSymbolByIndex(s, symIndex);
+    if (symAtI == NULL) {
+      raiseError("Symbol entry not yet defined");
+    } else {
+      insertElem(symAtI->data, data, hash);
+      return 0;
+    }
+  } else {
     return -1;
   }
 }
@@ -119,17 +135,28 @@ STable *freeSTable(STable *s) {
 }
 
 int main(int argc, char *argv[]) {
+  char *strings[] = {
+    "flux", "increase", "chainz"
+  };
+
   STable *sT = createSTable(100);
-  int nQ = newSymbolEntry(sT);
-  int nS = newSymbolEntry(sT);
-  int nT = newSymbolEntry(sT);
+  int intIndex = newSymbolEntry(sT);
+  int stringIndex = newSymbolEntry(sT);
+  int doubleIndex = newSymbolEntry(sT);
 
   Symbol *f1 = getSymbolByIndex(sT, 1);
   HashList *hl = (HashList *)(f1 == NULL ? NULL : f1->data);
+  int i;
+  for (i=0; i < sizeof(strings)/sizeof(strings[0]); ++i) {
+    printf("insertion : %d\n", 
+      addSymbol(sT, 0, strdup(strings[i]), i)
+    );
+  }
+
   printf("hl: %p hSz: %d\n", hl, hl->size);
-  printf("nq %d\n", nQ);
-  printf("ns %d\n", nS);
-  printf("ns %d\n", nT);
+  printf("intIndex %d\n", intIndex);
+  printf("ns %d\n", stringIndex);
+  printf("ns %d\n", doubleIndex);
   sT = freeSTable(sT);
   return 0;
 }
