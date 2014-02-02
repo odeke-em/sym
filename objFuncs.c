@@ -1,0 +1,167 @@
+// Author: Emmanuel Odeke <odeke@ualberta.ca>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "objFuncs.h"
+
+void printObject(const Object *o) {
+  if (o != NULL) {
+    switch(o->typeTag) {
+      case LIntTag: {
+        printf("%ld", *((uint64 *)o->data));
+        break;
+      }
+      case CharArrayTag: {
+        printf("%s", (char *)o->data);
+        break;
+      }
+      case IntTag: {
+        printf("%d", *((uint32 *)o->data));
+        break;
+      }
+      case DoubleTag: {
+        printf("%2.3f", *((double *)o->data)); 
+        break;
+      }
+      case KeyValueTag: {
+        printKvStruct((KeyValue *)o->data);
+        break;
+      }
+      default: break;
+    }
+  }
+}
+
+inline uint64 getHash(const Object *elem) {
+  hashFunc hasher = getHashFuncByObject(elem);
+  
+  return hasher == NULL ? 0 : hasher(elem->data);
+}
+
+inline uint64 intHashFunc(const void *data) {
+  return data ? *(int *)data : 0;
+}
+
+uint64 pjwCharHash(const void *data) {
+  uint64 h = 0;
+  if (data != NULL) {
+    char *dCast = (char *)data;
+    int g = 0;
+    while (*dCast != '\0') {
+      h = (h << 4) + *dCast;
+      g = h & 0xf0000000;
+      if (g) {
+        h ^= (g >> 24);
+        h ^= g;
+      }
+       ++dCast;
+    }
+  }
+
+  return h;
+}
+
+inline uint64 doubleHashFunc(const void *data) {
+  return data ? *(int *)data : 0;
+}
+
+hashFunc getHashFuncByObject(const Object *o) {
+  hashFunc hFunc = NULL;
+  if (o != NULL) {
+    switch(o->typeTag) {
+      case IntTag: {
+        hFunc = intHashFunc;
+        break;
+      }
+      case CharArrayTag: {
+        hFunc = pjwCharHash;
+        break;
+      }
+      case LIntTag: {
+        hFunc = intHashFunc;
+        break;
+      }
+      default:break;
+    }
+  }
+
+  return hFunc;
+}
+
+inline KeyValue *kvStruct(Object *key, Object *value) {
+  KeyValue *kv = (KeyValue *)malloc(sizeof(*kv));
+  kv->key = key;
+  kv->value = value;
+  return kv;
+}
+
+inline void destroyKvStruct(KeyValue *kv) {
+  if (kv != NULL) {
+    destroyObject(kv->key);
+    destroyObject(kv->value);
+    free(kv);
+  }
+}
+
+void printKvStruct(const KeyValue *kv) {
+  if (kv != NULL) {
+    printObject(kv->key);
+    putchar(':');
+    printObject(kv->value);
+  }
+}
+
+inline Object *kvObject(Object *key, Object *value) {
+  KeyValue *kv = kvStruct(key, value);
+  return newObject(kv, KeyValueTag, Heapd);
+}
+
+inline Object *intObject(const uint64 u) {
+  uint32 *uMem = (uint32 *)malloc(sizeof(*uMem));
+  *uMem = u;
+  return newObject(uMem, LIntTag, Heapd);
+}
+
+inline Object *doubleObject(const double d) {
+  double *dMem = (double *)malloc(sizeof(*dMem));
+  *dMem = d;
+  return newObject(dMem, DoubleTag, Heapd);
+}
+
+inline Object *charArrObject(char *v, const MemTag memTag) {
+  Object *newObj = NULL;
+  if (v != NULL) {
+    newObj = newObject(
+      v, CharArrayTag, memTag
+    );
+  }
+  return newObj;
+}
+
+inline Object *newObject(void *data, const TypeTag typeTag, const MemTag memTag) {
+  Object *o = (Object *)malloc(sizeof(Object));
+
+  o->data = data;
+  o->typeTag = typeTag;
+  o->memTag = memTag;
+  return o;
+}
+
+void destroyObject(Object *o) {
+  if (o != NULL) {
+    if (o->memTag == Heapd && o->data != NULL) {
+      switch(o->typeTag) {
+        case LIntTag: case CharArrayTag: 
+        case IntTag: free(o->data); break;
+        case KeyValueTag: {
+          KeyValue *kv = (KeyValue *)(o->data);
+          destroyObject(kv->key);
+          destroyObject(kv->value);
+        }
+        default: free(o->data); break;
+      }
+    }
+
+    free(o);
+  }
+}
