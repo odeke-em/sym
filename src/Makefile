@@ -2,13 +2,13 @@ CC := gcc
 FLAGS := -Wall -Wextra
 
 example1:	example1.c hashMap.o typedefs.h objFuncs.o
-	$(CC) $(FLAGS) example1.c objFuncs.o hashMap.o -o example1
+example2:	example2.c hashMap.o typedefs.h objFuncs.o
 
-hashMap.o:	hashMap.[ch] typedefs.h objFuncs.o
-	$(CC) $(FLAGS)  -c hashMap.c -o hashMap.o
+%.o:	%.c %.h
+	$(CC) $(FLAGS) -c $< -o $@
 
-objFuncs.o:	objFuncs.[ch] typedefs.h
-	$(CC) $(FLAGS) -c objFuncs.c -o objFuncs.o
+%:	%.o %.c
+	$(CC) $(FLAGS) $< -o $@
 
 clean:
 	rm -f *.o example1
