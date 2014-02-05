@@ -12,6 +12,18 @@ inline Chain *allocChain(void) {
   return (Chain *)malloc(sizeof(Chain));
 }
 
+Chain *filter(Chain *it, Quantifier qFunc) {
+  Chain *filtered = NULL;
+  while (it != NULL) {
+    if (qFunc(it->value) == True) {
+      filtered = prepend(filtered, it->value);
+    }
+    it = it->next; 
+  }
+
+  return filtered;
+}
+
 inline Chain *newChain(void) {
   Chain *n = allocChain();
   n->value = NULL;

@@ -5,11 +5,11 @@
 #include "objFuncs.h"
 
 inline void incrementRefCount(Object *o) {
-    if (o != NULL && o->isFreed == False) ++(*(&(o->refCount)));
+  if (o != NULL && o->isFreed == False) ++(*(&(o->refCount)));
 }
 
 inline void decrementRefCount(Object *o) {
-    if (o != NULL && o->isFreed == False && o->refCount) --(*(&(o->refCount)));
+  if (o != NULL && o->isFreed == False && o->refCount) --(*(&(o->refCount)));
 }
 
 inline void __clearRefCount(Object *o) {

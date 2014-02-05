@@ -37,4 +37,6 @@
   typedef struct {
     Object *key, *value;
   } KeyValue;
+
+  typedef Bool (*Quantifier)(const Object *o); 
 #endif
