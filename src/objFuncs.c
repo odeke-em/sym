@@ -169,6 +169,7 @@ inline Object *newObject(void *data, const TypeTag typeTag, const MemTag memTag)
 inline void *__freeAndClearMem(void *mem) {
   if (mem != NULL) {
     free(mem);
+    mem = NULL;
   }
   return mem;
 }
@@ -186,7 +187,7 @@ Object *destroyObject(Object *o) {
       }
     }
 
-    o->isFreed = True;
+    *(&(o->isFreed)) = True;
     free(o);
   }
 
