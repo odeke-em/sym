@@ -28,7 +28,9 @@
 
   typedef struct {
     void *data;
+    Bool isFreed;
     MemTag memTag;
+    uint32 refCount;
     TypeTag typeTag;
   } Object;
 

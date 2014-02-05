@@ -28,7 +28,8 @@ Bool isPrime(const Object *numObject) {
     #ifdef DEBUG
       printf("Sqrt: %ld numValue: %ld\n", sqrtValue, numValue);
     #endif
-      put(__primeSav, intObject(numValue), intObject(numValue));
+      Object *keyValue = intObject(numValue);
+      put(__primeSav, keyValue, keyValue);
       return True;
     } else { // Already memoized
       return True;
@@ -55,7 +56,8 @@ int main(int argc, char *argv[]) {
   uint64 *trav = knownPrimes,
 	 *end = trav + sizeof(knownPrimes)/sizeof(knownPrimes[0]); 
   while (trav < end) {
-    put(__primeSav, intObject(*trav), intObject(*trav));
+    Object *travObject = intObject(*trav);
+    put(__primeSav, travObject, travObject);
     ++trav;
   }
 
@@ -64,7 +66,7 @@ int main(int argc, char *argv[]) {
     if (isPrime(tmpObject)) {
       --primeCount;
     }
-    destroyObject(tmpObject);
+    tmpObject = destroyObject(tmpObject);
     ++i;
   }
 
@@ -82,6 +84,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  __primeSav =  destroyHashMap(__primeSav);
+  __primeSav = destroyHashMap(__primeSav);
+
+  // Attempt to free again:: Shouldn't be a problem
+  __primeSav = destroyHashMap(__primeSav);
   return 0;
 }

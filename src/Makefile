@@ -1,6 +1,7 @@
 CC := gcc
 FLAGS := -Wall -Wextra -lm
 
+refCount:	test/refCount.c objFuncs.o
 example1:	example1.c hashMap.o typedefs.h objFuncs.o
 firstNPrimes:	firstNPrimes.c hashMap.o typedefs.h objFuncs.o
 

@@ -4,6 +4,18 @@
 #include <string.h>
 #include "objFuncs.h"
 
+inline void incrementRefCount(Object *o) {
+    if (o != NULL && o->isFreed == False) ++(*(&(o->refCount)));
+}
+
+inline void decrementRefCount(Object *o) {
+    if (o != NULL && o->isFreed == False && o->refCount) --(*(&(o->refCount)));
+}
+
+inline void __clearRefCount(Object *o) {
+  if (o != NULL && o->isFreed == False && o->refCount) *(&(o->refCount)) = 0;
+}
+
 void printObject(const Object *o) {
   if (o != NULL) {
     switch(o->typeTag) {
@@ -90,17 +102,22 @@ hashFunc getHashFuncByObject(const Object *o) {
 
 inline KeyValue *kvStruct(Object *key, Object *value) {
   KeyValue *kv = (KeyValue *)malloc(sizeof(*kv));
+  incrementRefCount(key);
+  incrementRefCount(value);
   kv->key = key;
   kv->value = value;
   return kv;
 }
 
-inline void destroyKvStruct(KeyValue *kv) {
+inline KeyValue *destroyKvStruct(KeyValue *kv) {
   if (kv != NULL) {
-    destroyObject(kv->key);
-    destroyObject(kv->value);
+    kv->key   = destroyObject(kv->key);
+    kv->value = destroyObject(kv->value);
     free(kv);
+    kv = NULL;
   }
+
+  return kv;
 }
 
 void printKvStruct(const KeyValue *kv) {
@@ -144,24 +161,34 @@ inline Object *newObject(void *data, const TypeTag typeTag, const MemTag memTag)
   o->data = data;
   o->typeTag = typeTag;
   o->memTag = memTag;
+  o->isFreed = False;
+  o->refCount = 0;
   return o;
 }
 
-void destroyObject(Object *o) {
-  if (o != NULL) {
+inline void *__freeAndClearMem(void *mem) {
+  if (mem != NULL) {
+    free(mem);
+  }
+  return mem;
+}
+
+Object *destroyObject(Object *o) {
+  if (o != NULL && o->isFreed == False) {
     if (o->memTag == Heapd && o->data != NULL) {
       switch(o->typeTag) {
-        case LIntTag: case CharArrayTag: 
-        case IntTag: free(o->data); break;
+        case LIntTag: case CharArrayTag:  // Let these cases fall through
+        case IntTag: o->data = __freeAndClearMem(o->data); break;
         case KeyValueTag: {
-          KeyValue *kv = (KeyValue *)(o->data);
-          destroyObject(kv->key);
-          destroyObject(kv->value);
+          o->data = destroyKvStruct(o->data);
         }
-        default: free(o->data); break;
+        default:  o->data = __freeAndClearMem(o->data); break;
       }
     }
 
+    o->isFreed = True;
     free(o);
   }
+
+  return o;
 }

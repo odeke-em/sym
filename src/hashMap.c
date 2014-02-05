@@ -22,6 +22,7 @@ inline Chain *newChain(void) {
 Chain *prepend(Chain *n, Object *data) {
   Chain *aChain = newChain();
   aChain->value = data;
+  incrementRefCount(data);
   if (n != NULL) {
     aChain->next = n;
   }
@@ -34,7 +35,7 @@ Chain *destroyChain(Chain *n) {
     Chain *trav = n, *next = NULL;
     while (trav != NULL) {
       next = trav->next;
-      destroyObject(trav->value);
+      trav->value = destroyObject(trav->value);
       free(trav);
       trav = next;
     }
@@ -60,9 +61,11 @@ HashMap *destroyHashMap(HashMap *h) {
       }
 
       free(h->list);
+      h->list = NULL;
     }
 
     free(h);
+    h = NULL;
   }
 
   return h;

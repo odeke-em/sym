@@ -14,8 +14,12 @@
     void *data, const TypeTag typeTag, const MemTag memTag
   );
 
+  inline void incrementRefCount(Object *o);
+  inline void decrementRefCount(Object *o);
+  inline void __clearRefCount(Object *o);
+
   void printObject(const Object *o);
-  void destroyObject(Object *o);
+  Object *destroyObject(Object *o);
 
   inline Object *intObject(const uint64 u);
   inline Object *doubleObject(const double d);
@@ -24,6 +28,8 @@
   inline uint64 getHash(const Object *elem);
 
   inline KeyValue *kvStruct(Object *key, Object *value);
-  inline void destroyKvStruct(KeyValue *kv);
+  inline KeyValue *destroyKvStruct(KeyValue *kv);
   void printKvStruct(const KeyValue *kv);
+
+  inline void *__freeAndClearMem(void *mem);
 #endif
