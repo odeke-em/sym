@@ -4,7 +4,6 @@
 #include "../objFuncs.h"
 
 int main() {
-#define RESOLVE_INDEX_TEST
 #ifdef RESOLVE_INDEX_TEST
   struct QueryValue {
     char query;
@@ -47,8 +46,10 @@ int main() {
   Object *n10 = intObject(10);
   assert(n10 != NULL);
 
-  FILE *ifp = fopen(__FILE__, "r");
-  Trie *dict  = trieFromFile(ifp);
+  FILE *ifp = fopen("allHeaders.H", "r");
+  printf("ifp: %p\n", ifp);
+  Object *sentinel = charArrObject("$\0", Stackd);
+  Trie *dict  = trieFromFile(ifp, sentinel);
   dict = tput(dict, "sum\0", n10);
   Object *c10 = charArrObject("Symbioso\0", Stackd);
 
@@ -72,9 +73,14 @@ int main() {
   Object *afterPop = tget(dict, testKey);
   assert(afterPop == NULL);
 
-  printTrie(dict);
+  // printTrie(dict);
   putchar('\n');
 
+  Object *got = tget(dict, "ziff\0");
+  printObject(got);
+  putchar('\n');
+
+  printf("dict: %p\n", dict);
   dict = destroyTrie(dict);
   destroyObject(ret);
 

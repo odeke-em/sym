@@ -13,6 +13,7 @@
 #define ALPHA_DIFF  ((ALPHA_END - ALPHA_START) + 1)
 #define ALPHA_SIZE (ALPHA_DIFF * 2) // Remembering that 'Z' - 'A' is 25 yet there are 26 characters
                                     //  since 'A' -> base is at index 0, 'Z' the last is at 25
+
 inline Trie *allocTrie() { 
   return (Trie *)malloc(sizeof(Trie)); 
 }
@@ -54,29 +55,28 @@ Trie *createTrie() {
   return freshTrie;
 }
 
-Trie *trieFromFile(FILE *ifp) {
+Trie *trieFromFile(FILE *ifp, Object *sentinel) {
   Trie *fTrie = NULL;
   if (ifp != NULL) {
     fTrie = createTrie();
-    int MAX_SZ = 50;
+    int MAX_SZ = 90;
     while (! feof(ifp)) {
       int bufSz = 10, index = 0;
       char c, *wIn = (char *)malloc(sizeof(char) * bufSz);
       while ((c = getc(ifp)) && isalpha(c) && index < MAX_SZ) {
-    if (index >= bufSz) {
-      bufSz += 10; // Arbitrary increase of 10
+        if (index >= bufSz) {
+          bufSz += 10; // Arbitrary increase of 10
           wIn = (char *)realloc(wIn, sizeof(char) * bufSz);
-    }
+        }
     
-    *(wIn + index++) = c;
+        *(wIn + index++) = c;
       }
 
       if (index) {
-    *(wIn + index++) = '\0';
-    wIn = (char *)realloc(wIn, sizeof(char) * index);
-    fTrie = tput(fTrie, wIn, NULL);
+        *(wIn + index++) = '\0';
+        wIn = (char *)realloc(wIn, sizeof(char) * index);
+        fTrie = tput(fTrie, wIn, sentinel);
       }
-
       free(wIn);
     }
   }

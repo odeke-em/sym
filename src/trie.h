@@ -26,8 +26,8 @@
   Object *tget(Trie *tr, const char *key);
 
   void exploreTrie(Trie *t, const char *pAxiom);
+  Trie *trieFromFile(FILE *ifp, Object *sentinel);
 
-  Trie *trieFromFile(FILE *ifp);
   int ctoi(const char c);
   char itoc(const int i);
   void printTrie(Trie *t);
