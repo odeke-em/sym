@@ -10,8 +10,8 @@
 #include "objFuncs.h"
 #define ALPHA_START 'a'
 #define ALPHA_END   'z'
-#define ALPHA_DIFF  (ALPHA_END - ALPHA_START)
-#define ALPHA_SIZE ((('z' - 'a') * 2) + 2) // Remembering that 'Z' - 'A' is 25 yet there are 26 characters
+#define ALPHA_DIFF  ((ALPHA_END - ALPHA_START) + 1)
+#define ALPHA_SIZE (ALPHA_DIFF * 2) // Remembering that 'Z' - 'A' is 25 yet there are 26 characters
                                            //  since 'A' -> base is at index 0, 'Z' the last is at 25
 inline Trie *allocTrie() { 
   return (Trie *)malloc(sizeof(Trie)); 

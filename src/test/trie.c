@@ -4,19 +4,20 @@
 #include "../objFuncs.h"
 
 int main() {
+#define RESOLVE_INDEX_TEST
 #ifdef RESOLVE_INDEX_TEST
   struct QueryValue {
     char query;
     int expected;
   } QueryValues[] = {
-    'a', 0, '@', -1, 'A', 'z', 25, 0, 'b', 1, 'Z', 25, '1', -1, '3', -1, '#', -1
+    'A', 0, '@', -1, 'a', 26, 'Z', 25, 'b', 27, 'Z', 25, '1', -1, '3', -1, '#', -1, 'c', 28
   };
 
   struct QueryValue *qIt = QueryValues, *qHead = qIt,
     *qEnd = qIt + sizeof(QueryValues)/sizeof(QueryValues[0]);
 
   while (qIt < qEnd) {
-    int32 resIndex = resolveIndex(qIt->query);
+    int32 resIndex = ctoi(qIt->query);
     printf("resIndex: %d Expected: %d\n", resIndex, qIt->expected);
     assert(resIndex == qIt->expected);
     printf("qIt:: %ld %c => %d Passed\n", qIt - qHead, qIt->query, resIndex);
