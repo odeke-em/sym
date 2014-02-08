@@ -18,7 +18,12 @@
   // the sequence's end ie once we've hit a '\0' 
   Trie *tput(Trie *tr, const char *seq, Object *load);
 
-  Object *tget(Trie *tr, const char *seq);
+  // If parameter isQuery is clear ie False, then the found
+  // the found node's value is popped and returned
+  Object *__tQueryOrPop(Trie *tr, const char *seq, Bool isQuery);
+
+  Object *tpop(Trie *tr, const char *key);
+  Object *tget(Trie *tr, const char *key);
 
   void exploreTrie(Trie *t, const char *pAxiom);
 

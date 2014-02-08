@@ -12,7 +12,7 @@
 #define ALPHA_END   'z'
 #define ALPHA_DIFF  ((ALPHA_END - ALPHA_START) + 1)
 #define ALPHA_SIZE (ALPHA_DIFF * 2) // Remembering that 'Z' - 'A' is 25 yet there are 26 characters
-                                           //  since 'A' -> base is at index 0, 'Z' the last is at 25
+                                    //  since 'A' -> base is at index 0, 'Z' the last is at 25
 inline Trie *allocTrie() { 
   return (Trie *)malloc(sizeof(Trie)); 
 }
@@ -63,18 +63,18 @@ Trie *trieFromFile(FILE *ifp) {
       int bufSz = 10, index = 0;
       char c, *wIn = (char *)malloc(sizeof(char) * bufSz);
       while ((c = getc(ifp)) && isalpha(c) && index < MAX_SZ) {
-	if (index >= bufSz) {
-	  bufSz += 10; // Arbitrary increase of 10
+    if (index >= bufSz) {
+      bufSz += 10; // Arbitrary increase of 10
           wIn = (char *)realloc(wIn, sizeof(char) * bufSz);
-	}
-	
-	*(wIn + index++) = c;
+    }
+    
+    *(wIn + index++) = c;
       }
 
       if (index) {
-	*(wIn + index++) = '\0';
-	wIn = (char *)realloc(wIn, sizeof(char) * index);
-	fTrie = tput(fTrie, wIn, NULL);
+    *(wIn + index++) = '\0';
+    wIn = (char *)realloc(wIn, sizeof(char) * index);
+    fTrie = tput(fTrie, wIn, NULL);
       }
 
       free(wIn);
@@ -94,7 +94,7 @@ Trie *destroyTrie(Trie *tr) {
       Trie **end = it + ALPHA_SIZE;
       while (it < end) {
         if (*it != NULL) {
-	        *it = destroyTrie(*it);
+            *it = destroyTrie(*it);
         }
         ++it;
       }
@@ -121,26 +121,29 @@ void printTrie(Trie *t) {
 void exploreTrie(Trie *t, const char *pAxiom) {
   if (t != NULL) {
     if (t->nodes != NULL) {
-
       ssize_t pAxiomLen = strlen(pAxiom);
       // space for 1 extra char and a '\0'
       char *ownAxiom = (char *)malloc(pAxiomLen + 2); 
-      if (ownAxiom == NULL) raiseError("Run out of memory");
+      if (ownAxiom == NULL)
+        raiseError("Run out of memory");
+
       memcpy(ownAxiom, pAxiom, pAxiomLen);
       *(ownAxiom + pAxiomLen + 1) = '\0';
 
       Trie **it = t->nodes, 
-	         **end = it + ALPHA_SIZE, **start = it; 
+           **end = it + ALPHA_SIZE, **start = it; 
       while (it < end) {
-	      if (*it != NULL) {
+        if (*it != NULL) {
           *(ownAxiom + pAxiomLen) = itoc(it - start);
-	        if ((*it)->EOS == True) {
-	          printf("%s:", ownAxiom);
+
+          if ((*it)->EOS == True) {
+            printf("%s:", ownAxiom);
             printObject((*it)->value);
             putchar(' ');
-	        }
-	        exploreTrie(*it, ownAxiom);
-	      }
+          }
+
+          exploreTrie(*it, ownAxiom);
+        }
         ++it;
 
       }
@@ -169,8 +172,8 @@ Trie *tput(Trie *tr, const char *key, Object *value) {
           }
         }
 
-	      *(tr->nodes + targetIndex) =\
-	        tput(*(tr->nodes + targetIndex), key + 1, value);
+        *(tr->nodes + targetIndex) =\
+            tput(*(tr->nodes + targetIndex), key + 1, value);
       }
     } else { // End of this sequence, time to add the value
       tr->EOS = True;
@@ -181,19 +184,32 @@ Trie *tput(Trie *tr, const char *key, Object *value) {
   return tr;
 }
 
-Object *tget(Trie *tr, const char *query) {
-  if (query == NULL || tr == NULL) {
+Object *__tQueryOrPop(Trie *tr, const char *seq, Bool isQuery) {
+  if (seq == NULL || tr == NULL) {
     return NULL;
-  } else if (*query == '\0') {
-    return tr->value;
+  } else if (*seq == '\0') {
+    Object *retObject = tr->value;
+    if (isQuery == False) { // Therefore requesting for a pop
+       tr->value = NULL;
+       tr->EOS = False; // No longer visible as a key
+    }
+    return retObject;
   } else {
-    int resIndex = ctoi(*query);
+    int resIndex = ctoi(*seq);
     if (resIndex < 0 || resIndex >= ALPHA_SIZE) {
       return NULL;
     } else if (*(tr->nodes + resIndex) == NULL) { 
       return NULL;
     } else {
-      return tget(*(tr->nodes + resIndex), query + 1);
+      return __tQueryOrPop(*(tr->nodes + resIndex), seq + 1, isQuery);
     }
   }
+}
+
+Object *tget(Trie *tr, const char *key) {
+  return __tQueryOrPop(tr, key, True);
+}
+
+Object *tpop(Trie *tr, const char *key) {
+  return __tQueryOrPop(tr, key, False);
 }

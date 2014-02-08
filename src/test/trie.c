@@ -52,12 +52,25 @@ int main() {
   dict = tput(dict, "sum\0", n10);
   Object *c10 = charArrObject("Symbioso\0", Stackd);
 
-  // Exhibiting adding of spaces
-  dict = tput(dict, "sumofall\0", c10);
+  const char *testKey = "sumofallfears\0";
+  // Exhibiting adding of keys
+  dict = tput(dict, testKey, c10);
 
-  Object *ret = tget(dict, "sumofall\0");
+  // Exhibiting retrieval
+  Object *ret = tget(dict, testKey);
   assert(ret != NULL);
   printObject(ret);
+
+  // Exhibiting popping 
+  Object *popd = tpop(dict, testKey);
+  assert(popd != NULL); 
+
+  // The popd and previously queried values must point to the same memory
+  assert(popd == ret);
+
+  // Making sure that the testKey no longer has a value
+  Object *afterPop = tget(dict, testKey);
+  assert(afterPop == NULL);
 
   printTrie(dict);
   putchar('\n');
