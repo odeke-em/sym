@@ -73,7 +73,7 @@ int main() {
   Object *afterPop = tget(dict, testKey);
   assert(afterPop == NULL);
 
-  // printTrie(dict);
+  printTrie(dict);
   putchar('\n');
 
   Object *got = tget(dict, "ziff\0");
