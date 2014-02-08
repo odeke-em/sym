@@ -41,6 +41,8 @@ void printObject(const Object *o) {
       }
       default: break;
     }
+  } else {
+    printf("nil");
   }
 }
 

@@ -19,7 +19,7 @@
 
   typedef enum {
     IntTag, LIntTag, CharArrayTag, ObjTag,
-    Undefined, KeyValueTag, DoubleTag
+    Undefined, KeyValueTag, DoubleTag, PadTag
   } TypeTag;
 
   typedef enum {
