@@ -23,14 +23,13 @@ int getRank(const char *subject, const char *base) {
   int rank = -1;
   if (subject != NULL && base != NULL) {
     IndexNode *r[ALPHA_SIZE];
-    int subjectLen = strlen(subject)/1;
     int i;
     for (i=0; i < ALPHA_SIZE; ++i) {
       *(r + i) = NULL;
     }
 
     // For later ascending order traversal, add indices from high to low
-    i = subjectLen;  
+    i = strlen(subject)/1;
     while (--i >= 0) {
       if (isalpha(*(subject + i))) {
         int index = tolower(*(subject + i)) - 'a';
@@ -41,14 +40,14 @@ int getRank(const char *subject, const char *base) {
       }
     }
 
-    int reuses=0, moves=0, inplace=0, deletions=0, additions=0;
-
     printIndexNode(r);
+
+    int reuses=0, moves=0, inplace=0, deletions=0, additions=0;
     int baseLen = strlen(base)/1;
+
     for (i =0; i < baseLen; ++i) {
       if (isalpha(*(base + i))) {
         int index = tolower(*(base + i)) - 'a';
-        // printf("i: %d index: %d rIndex: %p %c\n", i, index, *(r + index), *(base + i));
         if (*(r + index) == NULL) {
           ++deletions;
         } else {
@@ -65,7 +64,6 @@ int getRank(const char *subject, const char *base) {
         }
       }
     }
-
 
     // Cleaning up
     IndexNode **tIt = r, **tEnd = tIt + ALPHA_SIZE, *tmp;
