@@ -48,11 +48,11 @@ int getRank(const char *subject, const char *base) {
     for (i =0; i < baseLen; ++i) {
       if (isalpha(*(base + i))) {
         int index = tolower(*(base + i)) - 'a';
+        // printf("i: %d index: %d rIndex: %p %c\n", i, index, *(r + index), *(base + i));
         if (*(r + index) == NULL) {
           ++deletions;
         } else {
           ++reuses;
-          printf("i: %d rIndex:%d\n", i, (*(r + index))->index);
           if ((*(r + index))->index == i) {
             ++inplace;
           } else {
@@ -89,7 +89,6 @@ int getRank(const char *subject, const char *base) {
 }
 
 int main() {
-  // printf("%d\n", getRank("https://www.youtube.com/watch?v=CfihYWRWRTQ\0", "https://github.com\0"));
-  printf("%d\n", getRank("https:www.\0", "https:github.com\0"));
+  printf("%d\n", getRank("https://www.youtube.com/watch?v=CfihYWRWRTQ\0", "https://github.com\0"));
   return 0;
 }
