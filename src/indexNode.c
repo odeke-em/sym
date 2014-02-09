@@ -18,6 +18,7 @@ void printIndexNode(IndexNode **r) {
     printf("]\n");
   }
 }
+
 int getRank(const char *subject, const char *base) {
   int rank = -1;
   if (subject != NULL && base != NULL) {
@@ -28,7 +29,9 @@ int getRank(const char *subject, const char *base) {
       *(r + i) = NULL;
     }
 
-    for (i=0; i < subjectLen; ++i) {
+    // For later ascending order traversal, add indices from high to low
+    i = subjectLen;  
+    while (--i >= 0) {
       if (isalpha(*(subject + i))) {
         int index = tolower(*(subject + i)) - 'a';
         IndexNode *t = (IndexNode *)malloc(sizeof(IndexNode));
@@ -41,14 +44,15 @@ int getRank(const char *subject, const char *base) {
     int reuses=0, moves=0, inplace=0, deletions=0, additions=0;
 
     printIndexNode(r);
-    i = strlen(base)/1;
-    while (--i >= 0) {
+    int baseLen = strlen(base)/1;
+    for (i =0; i < baseLen; ++i) {
       if (isalpha(*(base + i))) {
         int index = tolower(*(base + i)) - 'a';
         if (*(r + index) == NULL) {
           ++deletions;
         } else {
           ++reuses;
+          printf("i: %d rIndex:%d\n", i, (*(r + index))->index);
           if ((*(r + index))->index == i) {
             ++inplace;
           } else {
@@ -85,6 +89,7 @@ int getRank(const char *subject, const char *base) {
 }
 
 int main() {
-  printf("%d\n", getRank("https://www.youtube.com/watch?v=CfihYWRWRTQ\0", "https://github.com\0"));
+  // printf("%d\n", getRank("https://www.youtube.com/watch?v=CfihYWRWRTQ\0", "https://github.com\0"));
+  printf("%d\n", getRank("https:www.\0", "https:github.com\0"));
   return 0;
 }
