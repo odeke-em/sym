@@ -59,10 +59,11 @@ HashMap *primes(uint64 primeCount) {
   Object *tmpObject = intObject(i);
 
   while (primeCount) {
-    *((uint64 *)tmpObject->data) = i++;
+    *((uint64 *)tmpObject->data) = i;
     if (__isPrime(tmpObject, __primeSav)) {
       --primeCount;
     }
+    i += 2; // All other primes from 2 and above are odd
   }
 
   tmpObject = destroyObject(tmpObject);
