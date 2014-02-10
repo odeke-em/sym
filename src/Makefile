@@ -3,7 +3,7 @@ FLAGS := -Wall -Wextra -lm
 
 refCount:	test/refCount.c objFuncs.o
 example1:	example1.c hashMap.o typedefs.h objFuncs.o
-firstNPrimes:	firstNPrimes.c hashMap.o typedefs.h objFuncs.o
+primeLib:	primeLib.c hashMap.o typedefs.h objFuncs.o
 
 %.o:	%.c %.h
 	$(CC) $(FLAGS) -c $< -o $@
