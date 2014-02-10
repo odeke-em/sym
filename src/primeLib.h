@@ -11,7 +11,7 @@
 
   int32 bSearch(const uint64 query, const uint64 *arr, const uint32 size);
 
-  uint64 intersectionSum(const int64 *l, const uint32 lSize, const int64 *r, const uint32 rSize);
+  uint64 intersectionSum(const int64 *l, const uint32 lSize, const uint64 *r, const uint32 rSize);
 
   // Returns True if a prime is truncatable and so are all it's
   // [su/pre]fixes as determined by the truncator function

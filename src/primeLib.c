@@ -160,7 +160,7 @@ int32 bSearch(const uint64 query, const uint64 *arr, const uint32 size) {
   return -1;
 }
 
-uint64 intersectionSum(const int64 *l, const uint32 lSize, const int64 *r, const uint32 rSize) {
+uint64 intersectionSum(const int64 *l, const uint32 lSize, const uint64 *r, const uint32 rSize) {
   uint64 sum = 0;
   if (l != NULL && r != NULL) {
     uint32 i;
@@ -175,6 +175,7 @@ uint64 intersectionSum(const int64 *l, const uint32 lSize, const int64 *r, const
   return sum;
 }
 
+#ifdef REV_MAIN
 int main(int argc, char *argv[]) {
   uint64 i=0, primeCount=1000;
   if (argc > 1) {
@@ -196,3 +197,4 @@ int main(int argc, char *argv[]) {
   nprimes = destroyHashMap(nprimes);
   return 0;
 }
+#endif
