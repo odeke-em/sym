@@ -1,16 +1,17 @@
-#include <stdio.h>
+// Author: Emmanuel Odeke <odeke@ualberta.ca>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "objFuncs.h"
-#include "hashMap.h"
+#include "primeLib.h"
 
-HashMap *__primeSav = NULL;
-Bool isPrime(const Object *numObject) {
+Bool __isPrime(const Object *numObject, HashMap *__primeSav) {
   if (numObject != NULL && numObject->data != NULL) {
     switch(numObject->typeTag) {
       case LIntTag: case IntTag: break;
       default: return False;
     }
+
     uint64 numValue = *(uint64 *)numObject->data;
     if (numValue < 2) {
       return False;
@@ -39,31 +40,25 @@ Bool isPrime(const Object *numObject) {
   }
 }
 
-int main(int argc, char *argv[]) {
-  uint64 i=0, primeCount=1000;
-  printf("argc:: %d\n", argc);
-  if (argc > 1) {
-    if (sscanf(argv[1], "%ld", &primeCount) != 1) {
-      primeCount=10000;
-    }
-  }
-
+HashMap *primes(uint64 primeCount) {
   printf("\033[92mGenerating the first: %ld primes\n\033[00m", primeCount);
-  __primeSav = createHashMapWithSize((primeCount * 100) + 3);
+  HashMap *__primeSav = createHashMapWithSize((primeCount * 100) + 3);
 
   // Punching in the known primes
   uint64 knownPrimes[] = { 2, 3, 5, 7, 11, 13, 17 };
   uint64 *trav = knownPrimes,
-	 *end = trav + sizeof(knownPrimes)/sizeof(knownPrimes[0]); 
+	       *end = trav + sizeof(knownPrimes)/sizeof(knownPrimes[0]); 
+
   while (trav < end) {
     Object *travObject = intObject(*trav);
     put(__primeSav, travObject, travObject);
     ++trav;
   }
 
+  uint64 i=0;
   while (primeCount) {
     Object *tmpObject = intObject(i);
-    if (isPrime(tmpObject)) {
+    if (__isPrime(tmpObject, __primeSav)) {
       --primeCount;
     }
     tmpObject = destroyObject(tmpObject);
@@ -76,17 +71,26 @@ int main(int argc, char *argv[]) {
     uint64 primeIndex = 0;
     while (pIt < pEnd) {
       if (*pIt != NULL) {
-	printf("%-20ld", ++primeIndex);
-	printObject((*pIt)->value);
-	printf("\n");
+	      printf("%-20ld", ++primeIndex);
+	      printObject((*pIt)->value);
+	      printf("\n");
       }
       ++pIt;
     }
   }
 
-  __primeSav = destroyHashMap(__primeSav);
+  return __primeSav;
+}
 
-  // Attempt to free again:: Shouldn't be a problem
-  __primeSav = destroyHashMap(__primeSav);
+int main(int argc, char *argv[]) {
+  uint64 i=0, primeCount=1000;
+  if (argc > 1) {
+    if (sscanf(argv[1], "%ld", &primeCount) != 1) {
+      primeCount=10000;
+    }
+  }
+
+  HashMap *nprimes = primes(primeCount);
+  nprimes = destroyHashMap(nprimes);
   return 0;
 }
