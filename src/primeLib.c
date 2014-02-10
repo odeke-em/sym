@@ -55,15 +55,17 @@ HashMap *primes(uint64 primeCount) {
     ++trav;
   }
 
-  uint64 i=0;
+  uint64 i=17;
+  Object *tmpObject = intObject(i);
+
   while (primeCount) {
-    Object *tmpObject = intObject(i);
+    *((uint64 *)tmpObject->data) = i++;
     if (__isPrime(tmpObject, __primeSav)) {
       --primeCount;
     }
-    tmpObject = destroyObject(tmpObject);
-    ++i;
   }
+
+  tmpObject = destroyObject(tmpObject);
 
 #ifdef PRINT_CONTENT
   if (__primeSav != NULL) {
