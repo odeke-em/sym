@@ -1,3 +1,4 @@
+// Author: Emmanuel Odeke <odeke@ualberta.ca>
 #ifndef _MAP_ON_THREADS_H
 #define _MAP_ON_THREADS_H
     typedef struct {
