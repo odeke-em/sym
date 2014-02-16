@@ -10,6 +10,11 @@
 WordShell *createWordShell(const int bufferSize) {
     WordShell *wp = (WordShell *)malloc(sizeof(WordShell));
     wp->data = (char **)malloc(sizeof(char *) * bufferSize);
+    char **it = wp->data, **end = it + bufferSize;
+    while (it < end) {
+      *it++ = NULL;
+    }
+
     wp->size = bufferSize;
     return wp;
 }
@@ -21,7 +26,7 @@ void *filter(void *data) {
         // printf("wpFilterShell: %p\n", wpShell);
         if (wpShell->wStart != NULL && wpShell->wEnd != NULL && wpShell->filter != NULL) {
             char **wIt = wpShell->wStart, **wEnd = wpShell->wEnd;
-            printf("wStart: %p wEnd: %p diff: %ld\n", wIt, wEnd, wEnd - wIt);
+            printf("wStart: %p wEnd: %p diff: %d\n", wIt, wEnd, wEnd - wIt);
             int resIndex = 0, resBufSize = wEnd - wIt;
             WordShell *resWrap = createWordShell(resBufSize);
             while (wIt < wEnd) {
@@ -40,7 +45,7 @@ void *filter(void *data) {
                 resWrap->data = (char **)realloc(resWrap->data, sizeof(char *) * resIndex);
                 result = resWrap;
             } else {
-                free(resWrap);
+                resWrap = destroyWrap(resWrap);
             }
         }
     }
@@ -48,11 +53,10 @@ void *filter(void *data) {
     return result;
 }
 
-WordShell *wordShellFromFile(const char *path, int (*customFilter)(const char)) {
+WordShell *wordShellFromFile(const char *path, int (*customFilter)(const int)) {
     WordShell *wrap = NULL;
     FILE *ifp = fopen(path, "r");
     if (ifp != NULL) {
-        wrap = (WordShell *)malloc(sizeof(WordShell));
         int bufSize = 100, j=0;
         wrap = createWordShell(bufSize);
         while (! feof(ifp)) {
@@ -76,6 +80,7 @@ WordShell *wordShellFromFile(const char *path, int (*customFilter)(const char)) 
                 *(wrap->data + j++) = cIn;
             } else {
                 free(cIn);
+                cIn = NULL;
             }
         }
 
@@ -83,10 +88,10 @@ WordShell *wordShellFromFile(const char *path, int (*customFilter)(const char)) 
             wrap->data = (char **)realloc(wrap->data, sizeof(char *) * j);
             wrap->size = j;
         } else {
-            free(wrap->data);
-            free(wrap);
-            wrap = NULL;
+            wrap = destroyWrap(wrap);
         }
+
+        fclose(ifp);
     }
 
     return wrap;
@@ -110,20 +115,23 @@ WordShell *destroyWrap(WordShell *wp) {
                 ++wIt;
             }
             free(wp->data);
+            wp->data = NULL;
         }
         free(wp);
+        wp = NULL;
     }
 
     return wp;
 }
 
-WordShell *mapOnThreads(const char *path, unsigned int threadCount, unsigned int (*filterFunc)(const char *w)) {
+WordShell *mapOnThreads(const char *path, unsigned int threadCount, int (*filterFunc)(const char *w)) {
     WordShell *mainWrap = wordShellFromFile(path, isalpha);
-    if (! threadCount) 
+    if (! threadCount) {
         threadCount = 1;
+    }
 
-    int i=0, sliceSize = 1 + (mainWrap->size / threadCount);
-    int isRunning = 1, startIdx=0, endIdx;
+    unsigned int i=0, sliceSize = 1 + (mainWrap->size / threadCount);
+    unsigned int isRunning = 1, startIdx=0, endIdx;
     printf("ThreadCount: %d sliceSize: %d\n", threadCount, sliceSize);
     pthread_t thList[threadCount];
 
@@ -154,19 +162,27 @@ WordShell *mapOnThreads(const char *path, unsigned int threadCount, unsigned int
         if (pthread_join(thList[i], (void **)&wResult)) {
             printf("\033[91mFailed to join thread: %d\033[00m\n", i);
         } else {
-            if (wResult != NULL && wResult->data != NULL) {
-                printf("Result size: %d\n", wResult->size);
-                char **it = wResult->data, **end = it + wResult->size;
-                while (it < end) {
-                    if (*it != NULL) {
-                        *(wrapResult->data + wrapIndex++) = *it;
+            if (wResult != NULL) {
+                if  (wResult->data != NULL) {
+                    printf("Result size: %d\n", wResult->size);
+                    char **it = wResult->data, **end = it + wResult->size;
+                    while (it < end) {
+                        if (*it != NULL) {
+                            *(wrapResult->data + wrapIndex++) = *it;
+                        }
+                        ++it;
                     }
-                    ++it;
+                } else {
+                    wResult = destroyWrap(wResult);
                 }
+            } else {
+                printf("nully\n");
             }
         }
     }
 
+    wrapResult = destroyWrap(wrapResult);
+    /*
     printf("Combined Results length: %d\n", wrapIndex);
     if (wrapIndex) {
         wrapResult->size = wrapIndex;
@@ -175,14 +191,19 @@ WordShell *mapOnThreads(const char *path, unsigned int threadCount, unsigned int
         wrapResult = destroyWrap(wrapResult);
         wrapResult = NULL;
     }
+    */
 
-    return wrapResult;
+    mainWrap = destroyWrap(mainWrap);
+
+    return NULL; //wrapResult;
 }
 
 inline unsigned int longerThan8(const char *s) {
     return s != NULL && strlen(s) > 8 ? 1 : 0;
 }
 
+#define REV_MAIN
+#ifdef REV_MAIN
 int main(int argc, char *argv[]) {
     char *srcPath = __FILE__;
     unsigned int threadCount = 7, maxLen=10;
@@ -202,3 +223,4 @@ int main(int argc, char *argv[]) {
     thMapped = destroyWrap(thMapped);
     return 0;
 }
+#endif
