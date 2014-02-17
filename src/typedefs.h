@@ -19,7 +19,7 @@
 
   typedef enum {
     IntTag, LIntTag, CharArrayTag, ObjTag,
-    Undefined, KeyValueTag, DoubleTag, PadTag
+    Undefined, KeyValueTag, DoubleTag, PadTag, HashMapTag
   } TypeTag;
 
   typedef enum {
@@ -37,6 +37,17 @@
   typedef struct {
     Object *key, *value;
   } KeyValue;
+
+  typedef struct Chain_ {
+    Object *value;
+    struct Chain_ *next;
+  } Chain;
+
+  typedef struct {
+    uint32 size;
+    Chain **list;
+    Bool canCollide;
+  } HashMap;
 
   typedef Bool (*Quantifier)(const Object *o); 
 #endif

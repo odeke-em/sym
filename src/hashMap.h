@@ -2,17 +2,6 @@
 #ifndef _HASH_MAP_H
 #define _HASH_MAP_H
   #include "typedefs.h" 
-  typedef struct Chain_ {
-    Object *value;
-    struct Chain_ *next;
-  } Chain;
-
-  typedef struct {
-    uint32 size;
-    Chain **list;
-    Bool canCollide;
-  } HashMap;
-
   HashMap *createHashMapWithSize(const uint32 len);
 
   inline Chain *newChain();
@@ -30,6 +19,5 @@
 
   inline Bool isEmpty(const HashMap *h);
   inline uint32 getHSize(const HashMap *h);
-  void printChain(Chain *n);
   void printHashMap(HashMap *hm);
 #endif

@@ -39,6 +39,10 @@ void printObject(const Object *o) {
         printKvStruct((KeyValue *)o->data);
         break;
       }
+      case HashMapTag: {
+        printHashMap((HashMap *)o->data);
+        break;
+      }
       default: break;
     }
   } else {
@@ -95,6 +99,10 @@ hashFunc getHashFuncByObject(const Object *o) {
         hFunc = intHashFunc;
         break;
       }
+      case HashMapTag: {
+        hFunc = getHSize;
+        break;
+      }
       default:break;
     }
   }
@@ -141,6 +149,10 @@ inline Object *intObject(const uint64 u) {
   return newObject(uMem, LIntTag, Heapd);
 }
 
+inline Object *hashMapObject(HashMap *hm, const MemTag memTag) {
+  return newObject(hm, HashMapTag, memTag);
+}
+
 inline Object *doubleObject(const double d) {
   double *dMem = (double *)malloc(sizeof(*dMem));
   *dMem = d;
@@ -185,6 +197,9 @@ Object *destroyObject(Object *o) {
         case KeyValueTag: {
           o->data = destroyKvStruct(o->data);
         }
+        case HashMapTag: {
+          o->data = destroyHashMap(o->data);
+        }
         default:  o->data = __freeAndClearMem(o->data); break;
       }
     }
@@ -195,3 +210,4 @@ Object *destroyObject(Object *o) {
 
   return o;
 }
+

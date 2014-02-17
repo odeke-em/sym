@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "objFuncs.h"
 #include "primeLib.h"
 
 Bool __isPrime(const Object *numObject, HashMap *__primeSav) {
@@ -197,7 +198,9 @@ int main(int argc, char *argv[]) {
   if (lT != NULL) free(lT);
   if (rT != NULL) free(rT);
 
-  nprimes = destroyHashMap(nprimes);
+  Object *primeMapObject = hashMapObject(nprimes, Heapd);
+  printObject(primeMapObject);
+  primeMapObject = destroyObject(primeMapObject);
   return 0;
 }
 #endif
