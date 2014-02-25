@@ -60,6 +60,10 @@ inline uint64 intHashFunc(const void *data) {
   return data ? *(int *)data : 0;
 }
 
+inline uint64 getHashSize(const void *data) {
+  return data ? getHSize((HashMap *)data) : 0;
+}
+
 uint64 pjwCharHash(const void *data) {
   uint64 h = 0;
   if (data != NULL) {
@@ -100,7 +104,7 @@ hashFunc getHashFuncByObject(const Object *o) {
         break;
       }
       case HashMapTag: {
-        hFunc = getHSize;
+        hFunc = getHashSize;
         break;
       }
       default:break;

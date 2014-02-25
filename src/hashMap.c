@@ -87,7 +87,7 @@ inline Bool isEmpty(const HashMap *h) {
   return (h == NULL || h->list == NULL || ! h->size) ? True : False;
 };
 
-inline uint32 getHSize(const HashMap *h) {
+inline uint64 getHSize(const HashMap *h) {
   return isEmpty(h) ? 0 : h->size;
 }
 

@@ -119,6 +119,12 @@ void printTrie(Trie *t) {
 }
 
 void exploreTrie(Trie *t, const char *pAxiom) {
+  exploreAndMapTrie(t, pAxiom, NULL);
+}
+
+void exploreAndMapTrie(Trie *t, const char *pAxiom,
+  void (*func)(const char *, Object *)
+) {
   if (t != NULL) {
     if (t->nodes != NULL) {
       ssize_t pAxiomLen = strlen(pAxiom);
@@ -140,10 +146,14 @@ void exploreTrie(Trie *t, const char *pAxiom) {
             printf("%s:", ownAxiom);
             printObject((*it)->value);
             putchar(' ');
+            if (func != NULL) {
+              func(ownAxiom, (*it)->value);
+            }
           }
 
-          exploreTrie(*it, ownAxiom);
+          exploreAndMapTrie(*it, ownAxiom, func);
         }
+
         ++it;
 
       }
@@ -152,6 +162,7 @@ void exploreTrie(Trie *t, const char *pAxiom) {
     }
   }
 }
+
 Trie *tput(Trie *tr, const char *key, Object *value) {
 #ifdef DEBUG
   printf("%s seq: %s\n", __func__, key);

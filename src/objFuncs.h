@@ -8,6 +8,9 @@
   inline uint64 doubleHashFunc(const void *data);
   uint64 pjwCharHash(const void *data);
   inline uint64 intHashFunc(const void *data);
+  inline uint64 getHashSize(const void* data);
+
+  inline uint64 getHash(const Object *elem);
   hashFunc getHashFuncByObject(const Object *o);
 
   inline Object *newObject(
@@ -23,7 +26,7 @@
 
   extern void printChain(Chain *n);
   extern void printHashMap(HashMap *hm);
-  extern inline uint32 getHSize(const HashMap *h);
+  inline uint64 getHSize(const HashMap *elem);
   extern Chain *destroyChain(Chain *n);
   extern HashMap *destroyHashMap(HashMap *h);
 
@@ -32,7 +35,6 @@
   inline Object *charArrObject(char *v, const MemTag memTag);
   inline Object *kvObject(Object *key, Object *value);
   inline Object *hashMapObject(HashMap *hm, const MemTag memTag);
-  inline uint64 getHash(const Object *elem);
 
   inline KeyValue *kvStruct(Object *key, Object *value);
   inline KeyValue *destroyKvStruct(KeyValue *kv);

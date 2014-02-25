@@ -18,6 +18,6 @@
   HashMap *destroyHashMap(HashMap *h);
 
   inline Bool isEmpty(const HashMap *h);
-  inline uint32 getHSize(const HashMap *h);
+  inline uint64 getHSize(const HashMap *h);
   void printHashMap(HashMap *hm);
 #endif
