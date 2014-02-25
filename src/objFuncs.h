@@ -41,4 +41,11 @@
   void printKvStruct(const KeyValue *kv);
 
   inline void *__freeAndClearMem(void *mem);
+
+  inline Chain *newChain();
+  inline Chain *allocChain();
+  Chain *prepend(Chain *n, Object *data);
+
+  Chain *filter(Chain *it, Quantifier qFunc);
+
 #endif

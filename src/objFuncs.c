@@ -215,3 +215,52 @@ Object *destroyObject(Object *o) {
   return o;
 }
 
+inline Chain *allocChain(void) {
+  return (Chain *)malloc(sizeof(Chain));
+}
+
+Chain *filter(Chain *it, Quantifier qFunc) {
+  Chain *filtered = NULL;
+  while (it != NULL) {
+    if (qFunc(it->value) == True) {
+      filtered = prepend(filtered, it->value);
+    }
+    it = it->next; 
+  }
+
+  return filtered;
+}
+
+inline Chain *newChain(void) {
+  Chain *n = allocChain();
+  n->value = NULL;
+  n->next = NULL;
+  return n;
+}
+
+Chain *prepend(Chain *n, Object *data) {
+  Chain *aChain = newChain();
+  aChain->value = data;
+  incrementRefCount(data);
+  if (n != NULL) {
+    aChain->next = n;
+  }
+  n = aChain;
+  printf("Prepending:: %p\n", n);
+  return n;
+}
+
+Chain *destroyChain(Chain *n) {
+  if (n != NULL) {
+    Chain *trav = n, *next = NULL;
+    while (trav != NULL) {
+      next = trav->next;
+      trav->value = destroyObject(trav->value);
+      free(trav);
+      trav = next;
+    }
+    n = NULL;
+  }
+  
+  return n;
+}
