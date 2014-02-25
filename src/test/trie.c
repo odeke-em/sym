@@ -81,6 +81,11 @@ int main() {
   putchar('\n');
 
   printf("dict: %p\n", dict);
+
+  Chain *ct = __testChainPrependInFunc();
+  printChain(ct);
+  destroyChain(ct);
+
   dict = destroyTrie(dict);
   destroyObject(ret);
 

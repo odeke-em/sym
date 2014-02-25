@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "trie.h"
+#include "typedefs.h"
 #include "objFuncs.h"
 #define ALPHA_START 'a'
 #define ALPHA_END   'z'
@@ -118,13 +119,54 @@ void printTrie(Trie *t) {
   putchar('}');
 }
 
+KeyPairOp prepareKeyOp(Chain **target) {
+  void __f(const char *k, Object *v) {
+    printf("preparekeyOp: %s\n", __func__);
+    if (k != NULL) {
+      *target = prepend(*target, v);
+    }
+  }
+
+  return __f;
+}
+
 void exploreTrie(Trie *t, const char *pAxiom) {
   exploreAndMapTrie(t, pAxiom, NULL);
+}
+
+Chain *trieToLL(Trie *t) {
+  Chain *resultChain = NULL;
+  KeyPairOp kp = prepareKeyOp(&resultChain);
+  printf("\033[31mkp: %p\n", kp);
+  exploreAndMapTrie(t, "a\0", kp);
+  printf("\033[00m\n");
+
+  return resultChain;
+}
+
+void __consumeTest(KeyPairOp kp) {
+  int i;
+  
+  for (i=0; i < 10; ++i) {
+    kp("notLost\0", intObject(i));
+  }
+
+}
+
+Chain *__testChainPrependInFunc(void) {
+  Chain *result = NULL;
+  KeyPairOp kp = prepareKeyOp(&result);
+  __consumeTest(kp);
+  return result;
 }
 
 void exploreAndMapTrie(Trie *t, const char *pAxiom,
   void (*func)(const char *, Object *)
 ) {
+  if (func != NULL) {
+      printf("func: %p t: %p\n", func, t);
+  }
+
   if (t != NULL) {
     if (t->nodes != NULL) {
       ssize_t pAxiomLen = strlen(pAxiom);
@@ -150,7 +192,6 @@ void exploreAndMapTrie(Trie *t, const char *pAxiom,
               func(ownAxiom, (*it)->value);
             }
           }
-
           exploreAndMapTrie(*it, ownAxiom, func);
         }
 

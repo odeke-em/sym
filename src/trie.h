@@ -35,4 +35,10 @@
   int ctoi(const char c);
   char itoc(const int i);
   void printTrie(Trie *t);
+
+  Chain *trieToLL(Trie *t);
+  KeyPairOp prepareKeyOp(Chain **target);
+
+  void __consumeTest(KeyPairOp kp);
+  Chain *__testChainPrependInFunc(void);
 #endif
