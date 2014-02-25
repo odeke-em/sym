@@ -14,7 +14,7 @@
   typedef unsigned long int uint64;
 
   typedef enum {
-    False=1, True=0 //happy birthday
+    False=0, True=1
   } Bool;
 
   typedef enum {
