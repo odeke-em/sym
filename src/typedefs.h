@@ -48,6 +48,7 @@
     Chain **list;
     Bool canCollide;
   } HashMap;
-
+  
   typedef Bool (*Quantifier)(const Object *o); 
+  typedef void (*KeyPairOp)(const char *key, Object *o);
 #endif

@@ -25,10 +25,19 @@
   Object *tpop(Trie *tr, const char *key);
   Object *tget(Trie *tr, const char *key);
 
+  void exploreTrieAndAppend(Trie *t, const char *pAxiom, Chain **c);
+
+  void __exploreMapAndAppend(Trie *t, const char *pAxiom, Chain **tr);
   void exploreTrie(Trie *t, const char *pAxiom);
   Trie *trieFromFile(FILE *ifp, Object *sentinel);
 
   int ctoi(const char c);
   char itoc(const int i);
   void printTrie(Trie *t);
+
+  Chain *trieToLL(Trie *t);
+  KeyPairOp prepareKeyOp(Chain **target);
+
+  void __consumeTest(KeyPairOp kp);
+  Chain *__testChainPrependInFunc(void);
 #endif

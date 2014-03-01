@@ -5,8 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "trie.h"
+#include "typedefs.h"
 #include "objFuncs.h"
 #define ALPHA_START 'a'
 #define ALPHA_END   'z'
@@ -14,6 +16,8 @@
 #define ALPHA_SIZE (ALPHA_DIFF * 2) // Remembering that 'Z' - 'A' is 25 yet there are 26 characters
                                     //  since 'A' -> base is at index 0, 'Z' the last is at 25
 
+
+static pthread_mutex_t trieMutex = PTHREAD_MUTEX_INITIALIZER;
 inline Trie *allocTrie() { 
   return (Trie *)malloc(sizeof(Trie)); 
 }
@@ -118,7 +122,26 @@ void printTrie(Trie *t) {
   putchar('}');
 }
 
+Chain *trieToLL(Trie *t) {
+  Chain *resultChain = NULL;
+  exploreTrieAndAppend(t, "\0", &resultChain);
+  return resultChain;
+}
+
 void exploreTrie(Trie *t, const char *pAxiom) {
+  exploreTrieAndAppend(t, pAxiom, NULL);
+}
+
+void __consumeTest(KeyPairOp kp) {
+  int i;
+  
+  for (i=0; i < 10; ++i) {
+    kp("notLost\0", intObject(i));
+  }
+
+}
+
+void exploreTrieAndAppend(Trie *t, const char *pAxiom, Chain **c) {
   if (t != NULL) {
     if (t->nodes != NULL) {
       ssize_t pAxiomLen = strlen(pAxiom);
@@ -140,10 +163,14 @@ void exploreTrie(Trie *t, const char *pAxiom) {
             printf("%s:", ownAxiom);
             printObject((*it)->value);
             putchar(' ');
+            if (c != NULL) {
+              *c = prepend(*c, (*it)->value);
+            }
           }
 
-          exploreTrie(*it, ownAxiom);
+          exploreTrieAndAppend(*it, ownAxiom, c);
         }
+
         ++it;
 
       }
@@ -152,6 +179,7 @@ void exploreTrie(Trie *t, const char *pAxiom) {
     }
   }
 }
+
 Trie *tput(Trie *tr, const char *key, Object *value) {
 #ifdef DEBUG
   printf("%s seq: %s\n", __func__, key);
@@ -176,8 +204,10 @@ Trie *tput(Trie *tr, const char *key, Object *value) {
             tput(*(tr->nodes + targetIndex), key + 1, value);
       }
     } else { // End of this sequence, time to add the value
+      pthread_mutex_lock(&trieMutex);
       tr->EOS = True;
       tr->value = value;
+      pthread_mutex_unlock(&trieMutex);
     }
   }
 
@@ -188,11 +218,13 @@ Object *__tQueryOrPop(Trie *tr, const char *seq, Bool isQuery) {
   if (seq == NULL || tr == NULL) {
     return NULL;
   } else if (*seq == '\0') {
+    pthread_mutex_lock(&trieMutex);
     Object *retObject = tr->value;
     if (isQuery == False) { // Therefore requesting for a pop
        tr->value = NULL;
        tr->EOS = False; // No longer visible as a key
     }
+    pthread_mutex_unlock(&trieMutex);
     return retObject;
   } else {
     int resIndex = ctoi(*seq);

@@ -4,12 +4,6 @@
   #include "typedefs.h" 
   HashMap *createHashMapWithSize(const uint32 len);
 
-  inline Chain *newChain();
-  inline Chain *allocChain();
-  Chain *prepend(Chain *n, Object *data);
-
-  Chain *filter(Chain *it, Quantifier qFunc);
-
   Chain *get(const HashMap *h, const Object *key);
   inline Chain *pop(const HashMap *h, const Object *key);
   uint64 put(const HashMap *h, Object *key, Object *data);
@@ -18,6 +12,6 @@
   HashMap *destroyHashMap(HashMap *h);
 
   inline Bool isEmpty(const HashMap *h);
-  inline uint32 getHSize(const HashMap *h);
+  inline uint64 getHSize(const HashMap *h);
   void printHashMap(HashMap *hm);
 #endif
