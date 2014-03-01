@@ -98,7 +98,7 @@ inline Chain *pop(const HashMap *h, const Object *key) {
 }
 
 void printChain(Chain *n) {
-  printf("{");
+  printf("[");
   if (n != NULL) {
     Chain *trav;
     for (trav = n; trav != NULL; trav = trav->next) {
@@ -107,7 +107,7 @@ void printChain(Chain *n) {
         printf(", ");
     }
   }
-  printf("}\n");
+  printf("]\n");
 }
 
 void printHashMap(HashMap *hm) {

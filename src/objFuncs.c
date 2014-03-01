@@ -246,7 +246,9 @@ Chain *prepend(Chain *n, Object *data) {
     aChain->next = n;
   }
   n = aChain;
+#ifdef DEBUG
   printf("Prepending:: %p\n", n);
+#endif
   return n;
 }
 

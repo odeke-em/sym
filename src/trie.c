@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 
 #include "trie.h"
 #include "typedefs.h"
@@ -15,6 +16,8 @@
 #define ALPHA_SIZE (ALPHA_DIFF * 2) // Remembering that 'Z' - 'A' is 25 yet there are 26 characters
                                     //  since 'A' -> base is at index 0, 'Z' the last is at 25
 
+
+static pthread_mutex_t trieMutex = PTHREAD_MUTEX_INITIALIZER;
 inline Trie *allocTrie() { 
   return (Trie *)malloc(sizeof(Trie)); 
 }
@@ -119,29 +122,14 @@ void printTrie(Trie *t) {
   putchar('}');
 }
 
-KeyPairOp prepareKeyOp(Chain **target) {
-  void __f(const char *k, Object *v) {
-    printf("preparekeyOp: %s\n", __func__);
-    if (k != NULL) {
-      *target = prepend(*target, v);
-    }
-  }
-
-  return __f;
+Chain *trieToLL(Trie *t) {
+  Chain *resultChain = NULL;
+  exploreTrieAndAppend(t, "\0", &resultChain);
+  return resultChain;
 }
 
 void exploreTrie(Trie *t, const char *pAxiom) {
-  exploreAndMapTrie(t, pAxiom, NULL);
-}
-
-Chain *trieToLL(Trie *t) {
-  Chain *resultChain = NULL;
-  KeyPairOp kp = prepareKeyOp(&resultChain);
-  printf("\033[31mkp: %p\n", kp);
-  exploreAndMapTrie(t, "a\0", kp);
-  printf("\033[00m\n");
-
-  return resultChain;
+  exploreTrieAndAppend(t, pAxiom, NULL);
 }
 
 void __consumeTest(KeyPairOp kp) {
@@ -153,20 +141,7 @@ void __consumeTest(KeyPairOp kp) {
 
 }
 
-Chain *__testChainPrependInFunc(void) {
-  Chain *result = NULL;
-  KeyPairOp kp = prepareKeyOp(&result);
-  __consumeTest(kp);
-  return result;
-}
-
-void exploreAndMapTrie(Trie *t, const char *pAxiom,
-  void (*func)(const char *, Object *)
-) {
-  if (func != NULL) {
-      printf("func: %p t: %p\n", func, t);
-  }
-
+void exploreTrieAndAppend(Trie *t, const char *pAxiom, Chain **c) {
   if (t != NULL) {
     if (t->nodes != NULL) {
       ssize_t pAxiomLen = strlen(pAxiom);
@@ -188,11 +163,12 @@ void exploreAndMapTrie(Trie *t, const char *pAxiom,
             printf("%s:", ownAxiom);
             printObject((*it)->value);
             putchar(' ');
-            if (func != NULL) {
-              func(ownAxiom, (*it)->value);
+            if (c != NULL) {
+              *c = prepend(*c, (*it)->value);
             }
           }
-          exploreAndMapTrie(*it, ownAxiom, func);
+
+          exploreTrieAndAppend(*it, ownAxiom, c);
         }
 
         ++it;
@@ -228,8 +204,10 @@ Trie *tput(Trie *tr, const char *key, Object *value) {
             tput(*(tr->nodes + targetIndex), key + 1, value);
       }
     } else { // End of this sequence, time to add the value
+      pthread_mutex_lock(&trieMutex);
       tr->EOS = True;
       tr->value = value;
+      pthread_mutex_unlock(&trieMutex);
     }
   }
 
@@ -240,11 +218,13 @@ Object *__tQueryOrPop(Trie *tr, const char *seq, Bool isQuery) {
   if (seq == NULL || tr == NULL) {
     return NULL;
   } else if (*seq == '\0') {
+    pthread_mutex_lock(&trieMutex);
     Object *retObject = tr->value;
     if (isQuery == False) { // Therefore requesting for a pop
        tr->value = NULL;
        tr->EOS = False; // No longer visible as a key
     }
+    pthread_mutex_unlock(&trieMutex);
     return retObject;
   } else {
     int resIndex = ctoi(*seq);

@@ -25,10 +25,9 @@
   Object *tpop(Trie *tr, const char *key);
   Object *tget(Trie *tr, const char *key);
 
-  void exploreAndMapTrie(
-    Trie *t, const char *pAxiom, void (*func)(const char *k, Object *v)
-  );
+  void exploreTrieAndAppend(Trie *t, const char *pAxiom, Chain **c);
 
+  void __exploreMapAndAppend(Trie *t, const char *pAxiom, Chain **tr);
   void exploreTrie(Trie *t, const char *pAxiom);
   Trie *trieFromFile(FILE *ifp, Object *sentinel);
 

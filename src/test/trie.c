@@ -46,7 +46,7 @@ int main() {
   Object *n10 = intObject(10);
   assert(n10 != NULL);
 
-  FILE *ifp = fopen(__FILE__, "r");
+  FILE *ifp = fopen("Makefile", "r");
   printf("ifp: %p\n", ifp);
   Object *sentinel = charArrObject("$\0", Stackd);
   Trie *dict  = trieFromFile(ifp, sentinel);
@@ -82,7 +82,7 @@ int main() {
 
   printf("dict: %p\n", dict);
 
-  Chain *ct = __testChainPrependInFunc();
+  Chain *ct = trieToLL(dict);
   printChain(ct);
   destroyChain(ct);
 
