@@ -13,9 +13,12 @@
   typedef unsigned int uint32;
   typedef unsigned long int uint64;
 
+#ifndef _BOOL_D
+#define _BOOL_D
   typedef enum {
     False=0, True=1
   } Bool;
+#endif
 
   typedef enum {
     IntTag, LIntTag, CharArrayTag, ObjTag,
