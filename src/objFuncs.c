@@ -196,7 +196,7 @@ Object *destroyObject(Object *o) {
   if (o != NULL && o->isFreed == False) {
     if (o->memTag == Heapd && o->data != NULL) {
       switch(o->typeTag) {
-        case LIntTag: case CharArrayTag:  // Let these cases fall through
+        case LIntTag: case CharArrayTag: case DoubleTag:  // Let these cases fall through
         case IntTag: o->data = __freeAndClearMem(o->data); break;
         case KeyValueTag: {
           o->data = destroyKvStruct(o->data);

@@ -179,6 +179,7 @@ uint64 intersectionSum(const int64 *l, const uint32 lSize, const uint64 *r, cons
   return sum;
 }
 
+// #define REV_MAIN
 #ifdef REV_MAIN
 int main(int argc, char *argv[]) {
   uint64 i=0, primeCount=1000;
