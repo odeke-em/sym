@@ -47,6 +47,13 @@
   } Chain;
 
   typedef struct {
+    void *pass;
+    void *fail;
+    unsigned int _freed:1;
+    unsigned int _heapd:1;
+  } BinaryVote;
+
+  typedef struct {
     uint32 size;
     Chain **list;
     Bool canCollide;

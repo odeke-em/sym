@@ -18,35 +18,36 @@ inline void __clearRefCount(Object *o) {
 
 void printObject(const Object *o) {
   if (o != NULL) {
-    switch(o->typeTag) {
-      case LIntTag: {
-        printf("%ld", *((uint64 *)o->data));
-        break;
-      }
-      case CharArrayTag: {
-        printf("%s", (char *)o->data);
-        break;
-      }
-      case IntTag: {
-        printf("%d", *((uint32 *)o->data));
-        break;
-      }
-      case DoubleTag: {
-        printf("%2.3f", *((double *)o->data)); 
-        break;
-      }
-      case KeyValueTag: {
-        printKvStruct((KeyValue *)o->data);
-        break;
-      }
-      case HashMapTag: {
-        printHashMap((HashMap *)o->data);
-        break;
-      }
-      default: break;
-    }
-  } else {
     printf("nil");
+    return;
+  }
+ 
+  switch(o->typeTag) {
+    case LIntTag: {
+      printf("%ld", *((uint64 *)o->data));
+        break;
+    }
+    case CharArrayTag: {
+      printf("%s", (char *)o->data);
+      break;
+    }
+    case IntTag: {
+      printf("%d", *((uint32 *)o->data));
+      break;
+    }
+    case DoubleTag: {
+      printf("%2.3f", *((double *)o->data)); 
+      break;
+    }
+    case KeyValueTag: {
+      printKvStruct((KeyValue *)o->data);
+      break;
+    }
+    case HashMapTag: {
+      printHashMap((HashMap *)o->data);
+      break;
+    }
+    default: break;
   }
 }
 
@@ -66,18 +67,20 @@ inline uint64 getHashSize(const void *data) {
 
 uint64 pjwCharHash(const void *data) {
   uint64 h = 0;
-  if (data != NULL) {
-    char *dCast = (char *)data;
-    int g = 0;
-    while (*dCast != '\0') {
-      h = (h << 4) + *dCast;
-      g = h & 0xf0000000;
-      if (g) {
-        h ^= (g >> 24);
-        h ^= g;
-      }
-       ++dCast;
+  if (data == NULL)
+    return h;
+
+  char *dCast = (char *)data;
+  int g = 0;
+
+  while (*dCast != '\0') {
+    h = (h << 4) + *dCast;
+    g = h & 0xf0000000;
+    if (g) {
+      h ^= (g >> 24);
+      h ^= g;
     }
+    ++dCast;
   }
 
   return h;
@@ -88,30 +91,25 @@ inline uint64 doubleHashFunc(const void *data) {
 }
 
 hashFunc getHashFuncByObject(const Object *o) {
-  hashFunc hFunc = NULL;
-  if (o != NULL) {
-    switch(o->typeTag) {
-      case IntTag: {
-        hFunc = intHashFunc;
-        break;
-      }
-      case CharArrayTag: {
-        hFunc = pjwCharHash;
-        break;
-      }
-      case LIntTag: {
-        hFunc = intHashFunc;
-        break;
-      }
-      case HashMapTag: {
-        hFunc = getHashSize;
-        break;
-      }
-      default:break;
-    }
+  if (o == NULL)
+    return NULL;
+
+  switch(o->typeTag) {
+    case IntTag:
+      return intHashFunc;
+
+    case CharArrayTag:
+      return pjwCharHash;
+
+    case LIntTag:
+      return intHashFunc;
+    case HashMapTag:
+      return getHashSize;
+    default:
+      return NULL;
   }
 
-  return hFunc;
+  return NULL;
 }
 
 inline KeyValue *kvStruct(Object *key, Object *value) {
@@ -220,15 +218,60 @@ inline Chain *allocChain(void) {
 }
 
 Chain *filter(Chain *it, Quantifier qFunc) {
-  Chain *filtered = NULL;
+  Chain *pass = NULL;
+  Chain *fail = NULL;
+  Chain *selector = NULL;
   while (it != NULL) {
+    selector = fail;
     if (qFunc(it->value) == True) {
-      filtered = prepend(filtered, it->value);
+      selector = pass;
     }
+    selector = prepend(selector, it->value);
     it = it->next; 
   }
 
-  return filtered;
+  return pass;
+}
+
+BinaryVote *newBinaryVote() {
+  BinaryVote *bv = malloc(sizeof(*bv));
+  bv->_freed = 0;
+  bv->fail = NULL;
+  bv->pass = NULL;
+  bv->_heapd = 1;
+
+  return bv;
+}
+
+BinaryVote *destroyBinaryVote(BinaryVote *bv) {
+  if (bv != NULL && bv->_heapd && !bv->_freed) {
+    bv->_freed = 0;
+    free(bv);
+    bv = NULL;
+  }
+
+  return bv;
+}
+
+
+BinaryVote *vote(Chain *it, Quantifier qFunc) {
+  Chain *pass = NULL;
+  Chain *fail = NULL;
+  Chain *selector = NULL;
+  while (it != NULL) {
+    selector = fail;
+    if (qFunc(it->value) == True) {
+      selector = pass;
+    }
+    selector = prepend(selector, it->value);
+    it = it->next; 
+  }
+
+
+  BinaryVote *bv = newBinaryVote();
+  bv->pass = pass;
+  bv->fail = fail;
+  return bv;
 }
 
 inline Chain *newChain(void) {

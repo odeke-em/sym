@@ -48,4 +48,8 @@
 
   Chain *filter(Chain *it, Quantifier qFunc);
 
+  BinaryVote *newBinaryVote();
+  BinaryVote *vote(Chain *it, Quantifier qFunc);
+  BinaryVote *destroyBinaryVote(BinaryVote *bv);
+
 #endif
